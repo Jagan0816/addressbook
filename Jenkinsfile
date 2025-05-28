@@ -41,6 +41,13 @@ pipeline {
             }
         }
         stage('Publish') {
+            input {
+                message "select the platform to deploy"
+                ok "platform selected"
+                parameters{
+                    choice(name: 'NEWAPP', choices:['eks','ec2','on-premise'])
+                }
+            }
             steps {
                 echo 'Publishing the artifact to jfrog'
             }
