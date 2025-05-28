@@ -1,10 +1,18 @@
 pipeline {
     agent any
+     parameters {
+        string(name: 'Env', defaultValue: 'Test', description: 'Version to deploy')
+
+        booleanParam(name: 'executeTests', defaultValue: true, description: 'decide to run tc')
+
+        choice(name: 'APPVERSION', choices: ['1.1', '1.2', '1.3'])
+        
+    }
 
     stages {
         stage('Compile') {
             steps {
-                echo 'Compiling the code'
+                echo "Compiling the code in ${params.Env}"
             }
         }
         stage('CodeReview') {
@@ -13,6 +21,11 @@ pipeline {
             }
         }
         stage('UnitTest') {
+            when{
+                expression{
+                    params.executeTests == true
+                }
+            }
             steps {
                 echo 'Testing the code with junit'
             }
@@ -24,7 +37,7 @@ pipeline {
         }
         stage('Package') {
             steps {
-                echo 'Packaging the code'
+                echo "Packaging the code ${params.APPVERSION}"
             }
         }
         stage('Publish') {
