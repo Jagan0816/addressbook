@@ -1,5 +1,9 @@
 pipeline {
     agent any
+
+    tools{
+        maven 'mymaven'
+    }
      parameters {
         string(name: 'Env', defaultValue: 'Test', description: 'Version to deploy')
 
@@ -12,12 +16,18 @@ pipeline {
     stages {
         stage('Compile') {
             steps {
+                script{
                 echo "Compiling the code in ${params.Env}"
+                sh "mvn compile"
+            }    
             }
         }
         stage('CodeReview') {
             steps {
+                script{
                 echo 'Reviewing the code with pmd'
+                sh "mvn pmd:pmd"
+            }
             }
         }
         stage('UnitTest') {
@@ -27,17 +37,26 @@ pipeline {
                 }
             }
             steps {
+                script{
                 echo 'Testing the code with junit'
+                sh "mvn test"
+            }    
             }
         }
         stage('CoverageAnalysis') {
             steps {
+                script{
                 echo 'Static code coverage with jacoco'
+                sh "mvn verify"
+            }    
             }
         }
         stage('Package') {
             steps {
+                script{
                 echo "Packaging the code ${params.APPVERSION}"
+                sh "mvn package"
+            }    
             }
         }
         stage('Publish') {
@@ -49,7 +68,10 @@ pipeline {
                 }
             }
             steps {
+                script {
                 echo 'Publishing the artifact to jfrog'
+                sh "mvn -U deploy -s settings.xml"
+            }    
             }
         }
     }
